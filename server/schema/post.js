@@ -1,22 +1,60 @@
-// Resolvers define how to fetch the types defined in your schema.
-// This resolver retrieves books from the "books" array above.
-const postResolvers = {
-  Query: {},
-};
+const PostModel = require("../models/postModel");
 
 //Schema
 const postTypeDefs = `#graphql
- type Post {
+
+  type Post {
     _id: ID!
     content: String!
-    tags: [String!]!
+    tags: [String!]
     imgUrl: String
     authorId: ID!
-    comments: [Comment!]!
-    likes: [Like!]!
+    comments: [Comment]
+    likes: [String]
     createdAt: String!
-    updatedAt: String!
+    updatedAt: String
   }
+
+  type Comment {
+    id: ID!
+    content: String!
+    authorId: ID!
+    createdAt: String!
+  }
+
+  type Query {
+    getPost(id: ID!): Post
+    getAllPosts: [Post!]!
+  }
+
+  type Mutation {
+    createPost(content: String!, tags: [String], imgUrl: String, authorId: ID!): Post!
+    addComment(postId: ID!, content: String!, authorId: ID!): Post!
+    likePost(postId: ID!, userId: ID!): Post!
+  }
+
   `;
+
+const postResolvers = {
+  Query: {
+    getPost: async (_, { id }) => {
+      return await PostModel.getPostById(id);
+    },
+    getAllPosts: async () => {
+      return await PostModel.getAllPosts();
+    },
+  },
+  Mutation: {
+    createPost: async (_, { content, tags, imgUrl, authorId }) => {
+      return await PostModel.createPost(content, tags, imgUrl, authorId);
+    },
+    addComment: async (_, { postId, content, authorId }) => {
+      return await PostModel.addComment(postId, content, authorId);
+    },
+    likePost: async (_, { postId, userId }) => {
+      return await PostModel.likePost(postId, userId);
+    },
+  },
+}; 
 
 module.exports = { postResolvers, postTypeDefs };

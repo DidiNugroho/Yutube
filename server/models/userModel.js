@@ -16,6 +16,21 @@ class UserModel {
     return users;
   }
 
+  static async getUserByNameOrUsername(name, username) {
+    if(name && !username) {
+      const users = await database.collection("users").findOne({ name });
+      return users;
+    } else if (!name && username) {
+      const users = await database.collection("users").findOne({ username });
+      return users;
+    } else if (name && username) {
+      return await database.collection("users").findOne({
+        $or: [{ name }, { username }] // Fetches user if either name or username matches
+      });
+    }
+    return null;
+  }
+
   static async register(newUser) {
     const result = await database.collection("users").insertOne(newUser);
     return result;

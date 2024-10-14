@@ -16,6 +16,7 @@ const userTypeDefs = `#graphql
 
   type Query {
     getUser(_id: ID!): User
+    getUserByNameOrUsername(name: String, username: String): User
     getAllUsers: [User!]!
   }
 
@@ -32,6 +33,10 @@ const userTypeDefs = `#graphql
 // Resolvers
 const userResolvers = {
   Query: {
+    getUserByNameOrUsername: async (_, { name, username }) => {
+      const user = await UserModel.getUserByNameOrUsername(name, username); // Assuming you implement this method in your UserModel
+      return user;
+    },
     getUser: async (_, { _id }) => {
       const book = await UserModel.getUser(_id);
       return book;
