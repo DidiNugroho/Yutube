@@ -1,4 +1,3 @@
-// models/PostModel.js
 const { ObjectId } = require("mongodb");
 const { database } = require("../config/mongodb");
 
@@ -29,11 +28,15 @@ class PostModel {
   }
 
   static async addComment(postId, content, authorId) {
+    const user = await database
+      .collection("users")
+      .findOne({ _id: new ObjectId(authorId) });
+
     const comment = {
-      id: new ObjectId(),
+      username: user.username,
       content,
-      authorId: new ObjectId(authorId),
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     await database
@@ -47,7 +50,12 @@ class PostModel {
   }
 
   static async likePost(postId, userId) {
-    // Convert postId to ObjectId
+    const user = await database
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) });
+
+    const username = user.username;
+
     const post = await database
       .collection("posts")
       .findOne({ _id: new ObjectId(postId) });
@@ -56,26 +64,35 @@ class PostModel {
       throw new Error("Post not found.");
     }
 
-    const alreadyLiked = post.likes.includes(userId);
+    const alreadyLiked = post.likes.some(
+      (like) => like.id.equals(user._id)
+    );
 
     if (alreadyLiked) {
-      await database
-        .collection("posts")
-        .updateOne({ _id: new ObjectId(postId) }, { $pull: { likes: userId } });
+      // Unlike the post
+      await database.collection("posts").updateOne(
+        { _id: new ObjectId(postId) },
+        { $pull: { likes: { id: user._id } } }
+      );
     } else {
-      await database
-        .collection("posts")
-        .updateOne(
-          { _id: new ObjectId(postId) },
-          { $addToSet: { likes: userId } }
-        );
+      // Like the post
+      await database.collection("posts").updateOne(
+        { _id: new ObjectId(postId) },
+        {
+          $push: {
+            likes: {
+              id: user._id,
+              username,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          },
+        }
+      );
     }
 
-    return await database
-      .collection("posts")
-      .findOne({ _id: new ObjectId(postId) });
+    return await this.getPostById(postId);
   }
-  
 }
 
 module.exports = PostModel;

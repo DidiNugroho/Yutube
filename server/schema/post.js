@@ -10,17 +10,24 @@ const postTypeDefs = `#graphql
     imgUrl: String
     authorId: ID!
     comments: [Comment]
-    likes: [String]
+    likes: [Like]
     createdAt: String!
     updatedAt: String
   }
 
-  type Comment {
-    id: ID!
-    content: String!
-    authorId: ID!
+  type Like {
+    username: String!
     createdAt: String!
+    updatedAt: String!
   }
+
+  type Comment {
+    content: String!
+    username: String!
+    createdAt: String!
+    updatedAt: String!
+  }
+
 
   type Query {
     getPost(id: ID!): Post
