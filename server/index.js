@@ -3,11 +3,11 @@ const { startStandaloneServer } = require("@apollo/server/standalone");
 
 const {userTypeDefs, userResolvers} = require('./schema/user')
 const {postTypeDefs, postResolvers} = require('./schema/post')
-// const {followTypeDefs, followResolvers} = require('./schema/follow')
+const {followTypeDefs, followResolvers} = require('./schema/follow')
 
 const server = new ApolloServer({
-  typeDefs: [userTypeDefs, postTypeDefs], // , postTypeDefs, followTypeDefs
-  resolvers: [userResolvers, postResolvers], // , postResolvers, followResolvers
+  typeDefs: [userTypeDefs, postTypeDefs, followTypeDefs], 
+  resolvers: [userResolvers, postResolvers, followResolvers], 
 });
 
 // Start the standalone server
