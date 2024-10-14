@@ -1,6 +1,7 @@
 const { database } = require("../config/mongodb");
-const { hashPassword, comparePassword } = require("../helpers/bcrypt");
+const { hashPassword } = require("../helpers/bcrypt");
 const UserModel = require("../models/userModel");
+const {verifyToken, signToken} = require('../helpers/jwt')
 
 //Schema
 //typeDefs
@@ -18,9 +19,13 @@ const userTypeDefs = `#graphql
     getAllUsers: [User!]!
   }
 
+  type AuthPayload {
+    access_token: String!
+  }
+
   type Mutation {
     registerUser(name: String!, username: String!, email: String!, password: String!): User!
-    loginUser(email: String!, password: String!): String!
+    loginUser(email: String!, password: String!): AuthPayload!
   }
   `;
 
@@ -57,7 +62,7 @@ const userResolvers = {
       const existingUser = await database
         .collection("users")
         .findOne({ email });
-        
+
       if (existingUser) {
         throw new Error("Email already in use.");
       }
@@ -66,6 +71,16 @@ const userResolvers = {
       const newUser = { name, username, email, password: hashedPassword };
       await UserModel.register(newUser);
       return newUser;
+    },
+    loginUser: async (_, { email, password }) => {
+      const user = await UserModel.login(email, password);
+      const token = signToken({
+        _id: user._id,
+        username: user.username,
+        email: user.email
+      }) 
+
+      return {access_token: token};
     },
   },
 };
