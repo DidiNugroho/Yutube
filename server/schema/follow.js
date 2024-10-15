@@ -8,6 +8,13 @@ const followTypeDefs = `#graphql
     followerId: ID!
     createdAt: String!
     updatedAt: String
+    userData: UserData!
+  }
+
+  type UserData {
+    _id: ID!
+    name: String!
+    username: String!
   }
 
   type Query {
@@ -30,10 +37,12 @@ const followTypeDefs = `#graphql
 const followResolvers = {
   Query: {
     getFollowers: async (_, { userId }) => {
-      return await FollowModel.getFollowers(userId);
+      const followers = await FollowModel.getFollowers(userId);
+      return followers;
     },
     getFollowing: async (_, { userId }) => {
-      return await FollowModel.getFollowing(userId);
+      const following = await FollowModel.getFollowing(userId);
+      return following;
     },
   },
   Mutation: {

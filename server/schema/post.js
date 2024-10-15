@@ -13,6 +13,14 @@ const postTypeDefs = `#graphql
     likes: [Like]
     createdAt: String!
     updatedAt: String
+    authorData: AuthorData!
+  }
+
+  type AuthorData {
+    _id: ID!
+    name: String!
+    username: String!
+    email: String!
   }
 
   type Like {

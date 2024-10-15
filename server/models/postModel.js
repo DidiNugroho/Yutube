@@ -9,7 +9,30 @@ class PostModel {
   }
 
   static async getAllPosts() {
-    return await database.collection("posts").find().toArray();
+    const agg = [
+      {
+        '$lookup': {
+          'from': 'users', 
+          'localField': 'authorId', 
+          'foreignField': '_id', 
+          'as': 'authorData'
+        }
+      }, {
+        '$unwind': {
+          'path': '$authorData'
+        }
+      }, {
+        '$project': {
+          'authorData.password': 0
+        }
+      }, {
+        '$sort': {
+          'createdAt': -1
+        }
+      }
+    ]
+
+    return await database.collection("posts").aggregate(agg).toArray();
   }
 
   static async createPost(content, tags, imgUrl, authorId) {
