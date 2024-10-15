@@ -60,14 +60,18 @@ const postResolvers = {
     },
   },
   Mutation: {
-    createPost: async (_, { content, tags, imgUrl, authorId }) => {
-      return await PostModel.createPost(content, tags, imgUrl, authorId);
+    createPost: async (_, { content, tags, imgUrl, authorId }, context) => {
+      const user = await context.authentication();
+      const newPost = await PostModel.createPost({content, tags, imgUrl, authorId: user._id});
+      return newPost
     },
     addComment: async (_, { postId, content, authorId }) => {
-      return await PostModel.addComment(postId, content, authorId);
+      const user = await context.authentication();
+      return await PostModel.addComment({postId, content, authorId: user._id});
     },
     likePost: async (_, { postId, userId }) => {
-      return await PostModel.likePost(postId, userId);
+      const user = await context.authentication();
+      return await PostModel.likePost({postId, userId: user._id});
     },
   },
 }; 

@@ -2,40 +2,68 @@ const { ObjectId } = require("mongodb");
 const { database } = require("../config/mongodb");
 
 class PostModel {
-  static async getPostById(id) {
-    return await database
-      .collection("posts")
-      .findOne({ _id: new ObjectId(id) });
+  static async getPostById(id) {  
+    const agg = [  
+      {  
+        $match: {  
+          _id: new ObjectId(id),  
+        },  
+      },  
+      {  
+        $lookup: {  
+          from: "users",  
+          localField: "authorId",  
+          foreignField: "_id",  
+          as: "authorData",  
+        },  
+      },  
+      {  
+        $unwind: {  
+          path: "$authorData",  
+        },  
+      },  
+      {  
+        $project: {  
+          "authorData.password": 0,  
+        },  
+      },  
+    ];  
+  
+    const posts = await database.collection("posts").aggregate(agg).toArray();  
+    return posts[0]
   }
 
   static async getAllPosts() {
     const agg = [
       {
-        '$lookup': {
-          'from': 'users', 
-          'localField': 'authorId', 
-          'foreignField': '_id', 
-          'as': 'authorData'
-        }
-      }, {
-        '$unwind': {
-          'path': '$authorData'
-        }
-      }, {
-        '$project': {
-          'authorData.password': 0
-        }
-      }, {
-        '$sort': {
-          'createdAt': -1
-        }
-      }
-    ]
+        $lookup: {
+          from: "users",
+          localField: "authorId",
+          foreignField: "_id",
+          as: "authorData",
+        },
+      },
+      {
+        $unwind: {
+          path: "$authorData",
+        },
+      },
+      {
+        $project: {
+          "authorData.password": 0,
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ];
 
     return await database.collection("posts").aggregate(agg).toArray();
   }
 
-  static async createPost(content, tags, imgUrl, authorId) {
+  static async createPost({ content, tags, imgUrl, authorId }) {
     const newPost = {
       content,
       tags,
@@ -44,13 +72,13 @@ class PostModel {
       comments: [],
       likes: [],
       createdAt: new Date().toISOString(),
-      updatedAt: null,
+      updatedAt: new Date().toISOString(),
     };
     const result = await database.collection("posts").insertOne(newPost);
     return { _id: result.insertedId, ...newPost };
   }
 
-  static async addComment(postId, content, authorId) {
+  static async addComment({ postId, content, authorId }) {
     const user = await database
       .collection("users")
       .findOne({ _id: new ObjectId(authorId) });
@@ -72,7 +100,7 @@ class PostModel {
     return await this.getPostById(postId);
   }
 
-  static async likePost(postId, userId) {
+  static async likePost({ postId, userId }) {
     const user = await database
       .collection("users")
       .findOne({ _id: new ObjectId(userId) });
@@ -87,16 +115,16 @@ class PostModel {
       throw new Error("Post not found.");
     }
 
-    const alreadyLiked = post.likes.some(
-      (like) => like.id.equals(user._id)
-    );
+    const alreadyLiked = post.likes.some((like) => like.id.equals(user._id));
 
     if (alreadyLiked) {
       // Unlike the post
-      await database.collection("posts").updateOne(
-        { _id: new ObjectId(postId) },
-        { $pull: { likes: { id: user._id } } }
-      );
+      await database
+        .collection("posts")
+        .updateOne(
+          { _id: new ObjectId(postId) },
+          { $pull: { likes: { id: user._id } } }
+        );
     } else {
       // Like the post
       await database.collection("posts").updateOne(

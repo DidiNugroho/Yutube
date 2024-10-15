@@ -8,18 +8,6 @@ const followTypeDefs = `#graphql
     followerId: ID!
     createdAt: String!
     updatedAt: String
-    userData: UserData!
-  }
-
-  type UserData {
-    _id: ID!
-    name: String!
-    username: String!
-  }
-
-  type Query {
-    getFollowers(userId: ID!): [Follow!]!
-    getFollowing(userId: ID!): [Follow!]!
   }
 
   type ToggleFollowResponse {
@@ -29,38 +17,30 @@ const followTypeDefs = `#graphql
   }
 
   type Mutation {
-    toggleFollow(followingId: ID!, followerId: ID!): ToggleFollowResponse!
+    toggleFollow(followingId: ID!): ToggleFollowResponse!
   }
 `;
 
 //Resolvers
 const followResolvers = {
-  Query: {
-    getFollowers: async (_, { userId }) => {
-      const followers = await FollowModel.getFollowers(userId);
-      return followers;
-    },
-    getFollowing: async (_, { userId }) => {
-      const following = await FollowModel.getFollowing(userId);
-      return following;
-    },
-  },
   Mutation: {
-    toggleFollow: async (_, { followingId, followerId }) => {
-      const existingFollow = await FollowModel.findFollow(
+    toggleFollow: async (_, { followingId }, context) => {
+      const user = await context.authentication();
+
+      const existingFollow = await FollowModel.findFollow({
         followingId,
-        followerId
-      );
+        followerId: user._id
+      });
 
       if (existingFollow) {
-        await FollowModel.unfollow(followingId, followerId);
+        await FollowModel.unfollow({followingId, followerId: user._id});
         return {
           success: true,
           message: "Unfollowed successfully",
           follow: null,
         };
       } else {
-        const newFollow = await FollowModel.follow(followingId, followerId);
+        const newFollow = await FollowModel.follow({followingId, followerId: user._id});
         return {
           success: true,
           message: "Followed successfully",

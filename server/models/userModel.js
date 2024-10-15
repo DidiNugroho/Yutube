@@ -5,11 +5,54 @@ const { ObjectId } = require("mongodb");
 
 class UserModel {
   static async getUser(_id) {
-    const user = await database
-      .collection("users")
-      .findOne({ _id: new ObjectId(_id) });
+    const agg = [
+        { 
+            $match: { _id: new ObjectId(_id) } 
+        },
+        {
+            $lookup: {
+                from: 'follows',
+                localField: '_id',
+                foreignField: 'followingId',
+                as: 'followers',
+            },
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'followers.followerId',
+                foreignField: '_id', 
+                as: 'followerDetails',
+            },
+        },
+        {
+            $project: {
+                _id: 1, 
+                name: 1, 
+                username: 1, 
+                email: 1, 
+                followers: {
+                    $map: {
+                        input: '$followerDetails',
+                        as: 'follower',
+                        in: {
+                            _id: '$$follower._id',
+                            username: '$$follower.username',
+                            name: '$$follower.name',
+                        }
+                    }
+                },
+            },
+        },
+    ];
+    
+    const [user] = await database.collection("users").aggregate(agg).toArray();
+    
     return user;
-  }
+}
+
+  
+  
 
   static async getAllUsers() {
     const users = await database.collection("users").find().toArray();
@@ -25,7 +68,7 @@ class UserModel {
       return users;
     } else if (name && username) {
       return await database.collection("users").findOne({
-        $or: [{ name }, { username }] // Fetches user if either name or username matches
+        $or: [{ name }, { username }] 
       });
     }
     return null;
