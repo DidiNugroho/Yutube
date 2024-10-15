@@ -15,8 +15,14 @@ const followTypeDefs = `#graphql
     getFollowing(userId: ID!): [Follow!]!
   }
 
+  type ToggleFollowResponse {
+    success: Boolean!
+    message: String!
+    follow: Follow
+  }
+
   type Mutation {
-    toggleFollow(followingId: ID!, followerId: ID!): Follow!
+    toggleFollow(followingId: ID!, followerId: ID!): ToggleFollowResponse!
   }
 `;
 
@@ -39,10 +45,18 @@ const followResolvers = {
 
       if (existingFollow) {
         await FollowModel.unfollow(followingId, followerId);
-        return { followingId, followerId, message: "Unfollowed" };
+        return {
+          success: true,
+          message: "Unfollowed successfully",
+          follow: null,
+        };
       } else {
         const newFollow = await FollowModel.follow(followingId, followerId);
-        return newFollow;
+        return {
+          success: true,
+          message: "Followed successfully",
+          follow: newFollow,
+        };
       }
     },
   },
