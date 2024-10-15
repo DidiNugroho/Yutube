@@ -13,6 +13,7 @@ const userTypeDefs = `#graphql
     email: String!
     password: String!
     followers: [Follower!]
+    following: [Follower!]
   }
 
   type Follower {  

@@ -2,27 +2,44 @@ const { database } = require("../config/mongodb");
 const { comparePassword } = require("../helpers/bcrypt");
 const { ObjectId } = require("mongodb");
 
-
 class UserModel {
   static async getUser(_id) {
     const agg = [
         { 
             $match: { _id: new ObjectId(_id) } 
         },
+        //followers lookup
         {
             $lookup: {
                 from: 'follows',
                 localField: '_id',
-                foreignField: 'followingId',
+                foreignField: 'followingId', 
                 as: 'followers',
             },
         },
         {
             $lookup: {
                 from: 'users',
-                localField: 'followers.followerId',
+                localField: 'followers.followerId', 
                 foreignField: '_id', 
                 as: 'followerDetails',
+            },
+        },
+        //following lookup
+        {
+            $lookup: {
+                from: 'follows',
+                localField: '_id',
+                foreignField: 'followerId', 
+                as: 'following',
+            },
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'following.followingId', 
+                foreignField: '_id', 
+                as: 'followingDetails',
             },
         },
         {
@@ -42,6 +59,17 @@ class UserModel {
                         }
                     }
                 },
+                following: {
+                    $map: {
+                        input: '$followingDetails',
+                        as: 'followedUser',
+                        in: {
+                            _id: '$$followedUser._id',
+                            username: '$$followedUser.username',
+                            name: '$$followedUser.name',
+                        }
+                    }
+                },
             },
         },
     ];
@@ -51,8 +79,6 @@ class UserModel {
     return user;
 }
 
-  
-  
 
   static async getAllUsers() {
     const users = await database.collection("users").find().toArray();
@@ -60,7 +86,7 @@ class UserModel {
   }
 
   static async getUserByNameOrUsername(name, username) {
-    if(name && !username) {
+    if (name && !username) {
       const users = await database.collection("users").findOne({ name });
       return users;
     } else if (!name && username) {
@@ -68,7 +94,7 @@ class UserModel {
       return users;
     } else if (name && username) {
       return await database.collection("users").findOne({
-        $or: [{ name }, { username }] 
+        $or: [{ name }, { username }],
       });
     }
     return null;
@@ -85,7 +111,6 @@ class UserModel {
 
     const isPasswordValid = comparePassword(password, user.password);
     if (!isPasswordValid) throw new Error("Invalid credentials");
-
 
     return user;
   }
