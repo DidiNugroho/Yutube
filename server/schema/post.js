@@ -46,7 +46,7 @@ const postTypeDefs = `#graphql
   type Mutation {
     createPost(content: String!, tags: [String], imgUrl: String): Post!
     addComment(postId: ID!, content: String!): Post!
-    likePost(postId: ID!, userId: ID!): Post!
+    likePost(postId: ID!): Post!
   }
 
   `;
@@ -54,7 +54,13 @@ const postTypeDefs = `#graphql
 const postResolvers = {
   Query: {
     getPost: async (_, { id }) => {
-      return await PostModel.getPostById(id);
+      const posts = await PostModel.getPostById(id);
+
+      if(!posts) {
+        throw new Error("Post not found")
+      }
+
+      return posts
     },
     getAllPosts: async () => {
       
@@ -65,6 +71,10 @@ const postResolvers = {
 
       const posts = await PostModel.getAllPosts();
 
+      if(!posts) {
+        throw new Error("Post not found")
+      }
+
       await redis.set("posts:all", JSON.stringify(posts))
       
       return posts;
@@ -73,21 +83,32 @@ const postResolvers = {
   Mutation: {
     createPost: async (_, { content, tags, imgUrl }, context) => {
       const user = await context.authentication();
+      
       const newPost = await PostModel.createPost({content, tags, imgUrl, authorId: user._id});
+      
+      await redis.del("posts:all")
+
       return newPost
     },
     addComment: async (_, { postId, content }, context) => {
       const user = await context.authentication();
 
-      const newPost = await PostModel.addComment({postId, content, authorId: user._id});
+      const newPost = await PostModel.addComment({postId, content, username: user.username});
 
-      await redis.del("posts:all")
+      if(!newPost) throw new Error("Failed to add comment")
+
+      await redis.del("posts:all");
 
       return newPost
     },
     likePost: async (_, { postId }, context) => {
       const user = await context.authentication();
-      return await PostModel.likePost({postId, userId: user._id});
+
+      const likePost = await PostModel.likePost({postId, userId: user._id, username: user.username});
+
+      await redis.del("posts:all");
+      
+      return likePost;
     },
   },
 }; 

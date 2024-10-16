@@ -1,36 +1,39 @@
 const { ObjectId } = require("mongodb");
 const { database } = require("../config/mongodb");
+const { isValidObjectId } = require("../helpers/isValidObjectId");
 
 class PostModel {
-  static async getPostById(id) {  
-    const agg = [  
-      {  
-        $match: {  
-          _id: new ObjectId(id),  
-        },  
-      },  
-      {  
-        $lookup: {  
-          from: "users",  
-          localField: "authorId",  
-          foreignField: "_id",  
-          as: "authorData",  
-        },  
-      },  
-      {  
-        $unwind: {  
-          path: "$authorData",  
-        },  
-      },  
-      {  
-        $project: {  
-          "authorData.password": 0,  
-        },  
-      },  
-    ];  
-  
-    const posts = await database.collection("posts").aggregate(agg).toArray();  
-    return posts[0]
+  static async getPostById(id) {
+    const agg = [
+      {
+        $match: {
+          _id: new ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "authorId",
+          foreignField: "_id",
+          as: "authorData",
+        },
+      },
+      {
+        $unwind: {
+          path: "$authorData",
+        },
+      },
+      {
+        $project: {
+          "authorData.password": 0,
+        },
+      },
+    ];
+    const posts = await database.collection("posts").aggregate(agg).toArray();
+
+    if (!posts.length) throw new Error("Post not found");
+
+    return posts[0];
   }
 
   static async getAllPosts() {
@@ -78,13 +81,15 @@ class PostModel {
     return { _id: result.insertedId, ...newPost };
   }
 
-  static async addComment({ postId, content, authorId }) {
-    const user = await database
-      .collection("users")
-      .findOne({ _id: new ObjectId(authorId) });
+  static async addComment({ postId, content, username }) {
+    if (!postId) throw new Error("Post ID is required");
 
+    if (!isValidObjectId(postId)) {
+      throw new Error("Invalid Post ID format.");
+    }
+    
     const comment = {
-      username: user.username,
+      username,
       content,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -100,12 +105,12 @@ class PostModel {
     return await this.getPostById(postId);
   }
 
-  static async likePost({ postId, userId }) {
-    const user = await database
-      .collection("users")
-      .findOne({ _id: new ObjectId(userId) });
+  static async likePost({ postId, userId, username }) {
+    if (!postId) throw new Error("Post ID is required");
 
-    const username = user.username;
+    if (!isValidObjectId(postId)) {
+      throw new Error("Invalid Post ID format.");
+    }
 
     const post = await database
       .collection("posts")
@@ -115,7 +120,7 @@ class PostModel {
       throw new Error("Post not found.");
     }
 
-    const alreadyLiked = post.likes.some((like) => like.id.equals(user._id));
+    const alreadyLiked = post.likes.some((like) => like.id.equals(userId));
 
     if (alreadyLiked) {
       // Unlike the post
@@ -123,7 +128,7 @@ class PostModel {
         .collection("posts")
         .updateOne(
           { _id: new ObjectId(postId) },
-          { $pull: { likes: { id: user._id } } }
+          { $pull: { likes: { id: userId } } }
         );
     } else {
       // Like the post
@@ -132,7 +137,7 @@ class PostModel {
         {
           $push: {
             likes: {
-              id: user._id,
+              id: userId,
               username,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
