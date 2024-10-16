@@ -1,20 +1,35 @@
-// screens/LoginScreen.js
+// screens/RegisterScreen.js
 import { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
-export default function LoginScreen({ navigation }) {
+export default function RegisterScreen({ navigation }) {
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    navigation.replace('Home'); // Navigate to Home after login
+  const handleRegister = () => {
+    console.log({ name, username, email, password });
+    navigation.replace('Login'); // Go back to Login after registering
   };
 
   return (
     <View style={styles.container}>
       <View style={{ marginBottom: 20, alignItems: 'center' }}>
-        <Text style={styles.title}>Login</Text>
+        <Text style={styles.title}>Register</Text>
       </View>
+      <TextInput
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+        style={styles.input}
+      />
       <TextInput
         placeholder="Email"
         value={email}
@@ -28,11 +43,11 @@ export default function LoginScreen({ navigation }) {
         secureTextEntry
         style={styles.input}
       />
-      <Button title="Login" onPress={handleLogin} />
+      <Button title="Register" onPress={handleRegister} />
       <View style={{ marginTop: 10 }}>
         <Button
-          title="Go to Register"
-          onPress={() => navigation.navigate('Register')}
+          title="Back to Login"
+          onPress={() => navigation.navigate('Login')}
         />
       </View>
     </View>
