@@ -1,4 +1,3 @@
-// screens/LoginScreen.js
 import { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
@@ -7,8 +6,8 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    navigation.replace('Home'); // Navigate to Home after login
-  };
+    navigation.replace('HomeTabs'); 
+  };  
 
   return (
     <View style={styles.container}>

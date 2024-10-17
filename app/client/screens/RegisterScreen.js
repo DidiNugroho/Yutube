@@ -1,4 +1,3 @@
-// screens/RegisterScreen.js
 import { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
@@ -10,7 +9,7 @@ export default function RegisterScreen({ navigation }) {
 
   const handleRegister = () => {
     console.log({ name, username, email, password });
-    navigation.replace('Login'); // Go back to Login after registering
+    navigation.replace('Login'); 
   };
 
   return (

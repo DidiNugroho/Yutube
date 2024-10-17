@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Image, FlatList, StyleSheet, Button } from "react-native";
 
 export default function HomeScreen({ navigation }) {
-  // Dummy data for posts
+ 
   const posts = [
     {
       _id: "1",
@@ -42,7 +42,6 @@ export default function HomeScreen({ navigation }) {
           </View>
         )}
       />
-      <Button title="Logout" onPress={() => navigation.replace("Login")} />
     </View>
   );
 }
