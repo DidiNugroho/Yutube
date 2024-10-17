@@ -1,6 +1,7 @@
 import React from "react";
 import { gql, useQuery } from "@apollo/client";
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome"; 
 
 const GET_POST_BY_ID = gql`
   query GetPost($getPostId: ID!) {
@@ -54,11 +55,12 @@ export default function PostDetailScreen({ navigation, route }) {
           source={{ uri: `https://picsum.photos/500/500?random=${post._id}` }}
           style={styles.profilePic} 
         />
-        <Text style={styles.username}>{post.authorData.username}</Text>
+        <Text style={styles.username}>{post?.authorData.username}</Text>
       </View>
 
       <TouchableOpacity style={styles.likeButton}>
-        <Text style={styles.likeButtonText}>Like</Text>
+        <Icon name="thumbs-up" size={16} color="#fff" />
+        <Text style={styles.likeCount}>{post?.likes.length} Likes</Text> 
       </TouchableOpacity>
 
       <View style={styles.commentsContainer}>
@@ -105,15 +107,17 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   likeButton: {
-    backgroundColor: "tomato",
-    padding: 10,
+    backgroundColor: "black",
+    padding: 5,
     borderRadius: 5,
     alignItems: "center",
     marginVertical: 10,
+    flexDirection: "row",
+    alignSelf: "flex-start",
   },
-  likeButtonText: {
+  likeCount: {
     color: "#fff",
-    fontWeight: "bold",
+    marginLeft: 5, 
   },
   commentsContainer: {
     marginTop: 20,

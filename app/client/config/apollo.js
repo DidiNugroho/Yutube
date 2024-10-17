@@ -1,8 +1,27 @@
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+import * as SecureStore from 'expo-secure-store';
 
+// Create an HTTP link
+const httpLink = createHttpLink({
+  uri: 'https://bb9e-139-193-179-119.ngrok-free.app', 
+});
+
+const authLink = setContext(async (_, { headers }) => {
+  const token = await SecureStore.getItemAsync("access_token");
+
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "", 
+    }
+  };
+});
+
+// Create the Apollo client
 const client = new ApolloClient({
-    uri: 'https://bb9e-139-193-179-119.ngrok-free.app',
-    cache: new InMemoryCache(),
-  });
+  link: authLink.concat(httpLink), 
+  cache: new InMemoryCache(),
+});
 
 export default client;
