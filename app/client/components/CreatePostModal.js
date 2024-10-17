@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import {
   Modal,
   View,
@@ -9,20 +9,20 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
-} from 'react-native';
+} from "react-native";
 
 export default function CreatePostModal({ visible, onClose }) {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
 
   const user = {
-    username: 'PlaceholderUser',
-    profilePicture: 'https://via.placeholder.com/150',
+    username: "PlaceholderUser",
+    profilePicture: "https://via.placeholder.com/150",
   };
 
   const handleSubmit = () => {
-    console.log('Post Created:', { content, user });
+    console.log("Post Created:", { content, user });
     onClose();
-    setContent(''); 
+    setContent("");
   };
 
   return (
@@ -30,7 +30,10 @@ export default function CreatePostModal({ visible, onClose }) {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <View style={styles.userInfo}>
-            <Image source={{ uri: user.profilePicture }} style={styles.profileImage} />
+            <Image
+              source={{ uri: user.profilePicture }}
+              style={styles.profileImage}
+            />
             <Text style={styles.username}>{user.username}</Text>
           </View>
           <TouchableOpacity onPress={handleSubmit}>
@@ -57,18 +60,18 @@ export default function CreatePostModal({ visible, onClose }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 16,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 16,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   profileImage: {
     width: 40,
@@ -78,20 +81,20 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   postButton: {
     fontSize: 16,
-    color: 'tomato',
-    fontWeight: 'bold',
+    color: "tomato",
+    fontWeight: "bold",
   },
   contentInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: 'gray',
+    borderColor: "gray",
     borderRadius: 8,
     padding: 10,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     marginBottom: 10,
   },
   footer: {
