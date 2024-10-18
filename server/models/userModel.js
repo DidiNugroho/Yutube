@@ -85,20 +85,32 @@ class UserModel {
     return users;
   }
 
-  static async getUserByNameOrUsername(name, username) {
-    if (name && !username) {
-      const users = await database.collection("users").findOne({ name });
-      return users;
-    } else if (!name && username) {
-      const users = await database.collection("users").findOne({ username });
-      return users;
-    } else if (name && username) {
-      return await database.collection("users").findOne({
-        $or: [{ name }, { username }],
-      });
+  static async getUserByNameOrUsername(name, username, loggedUserId) {
+    const query = {
+      $or: []
+    };
+
+    if (loggedUserId) {
+      query.$and = [{ _id: { $ne: new ObjectId(loggedUserId) } }];
     }
+
+    if (name) {
+      query.$or.push({ name: { $regex: name, $options: 'i' } }); 
+    }
+    
+    if (username) {
+      query.$or.push({ username: { $regex: username, $options: 'i' } }); 
+    }
+
+    if (query.$or.length > 0) {
+      const user = await database.collection("users").findOne(query);
+      return user; 
+    }
+    
     return null;
   }
+  
+
 
   static async register(newUser) {
     const result = await database.collection("users").insertOne(newUser);

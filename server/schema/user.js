@@ -13,23 +13,31 @@ const userTypeDefs = `#graphql
     email: String!
     password: String!
     followers: [Follower!]
-    following: [Follower!]
+    following: [Following!]
   }
 
   type Follower {  
     _id: ID!  
     username: String!  
     name: String!  
+  }
+  
+  type Following {  
+    _id: ID!  
+    username: String!  
+    name: String!  
   } 
 
   type Query {
-    getUser(_id: ID!): User
+    getUser(_id: ID): User
     getUserByNameOrUsername(name: String, username: String): User
     getAllUsers: [User!]!
   }
 
   type AuthPayload {
     access_token: String!
+    userId: ID!
+    username: String!
   }
 
   type Mutation {
@@ -41,12 +49,19 @@ const userTypeDefs = `#graphql
 // Resolvers
 const userResolvers = {
   Query: {
-    getUserByNameOrUsername: async (_, { name, username }) => {
-      const user = await UserModel.getUserByNameOrUsername(name, username); // Assuming you implement this method in your UserModel
-      return user;
+    getUserByNameOrUsername: async (_, { name, username }, context) => {
+      const loggedUser = await context.authentication();
+      const users = await UserModel.getUserByNameOrUsername(name, username, loggedUser._id);
+
+      if (!users) {
+        throw new Error("User not found.");
+      }
+      
+      return users || []; 
     },
-    getUser: async (_, { _id }) => {
-      const user = await UserModel.getUser(_id);
+    getUser: async (_, { _id }, context) => {
+      const loggedUser = await context.authentication();
+      const user = await UserModel.getUser(_id || loggedUser._id);
       return user;
     },
     getAllUsers: async () => {
@@ -93,7 +108,11 @@ const userResolvers = {
         email: user.email
       }) 
 
-      return {access_token: token};
+      return {
+        access_token: token,
+        userId: user._id.toString(),
+        username: user.username,
+      };
     },
   },
 };

@@ -10,6 +10,13 @@ class FollowModel {
     });
   }
 
+  static async findAllFollowsByFollower(followerId) {
+    return await database
+      .collection("follows")
+      .find({ followerId: new ObjectId(followerId) })
+      .toArray();
+  }
+
   static async follow({followingId, followerId}) {
     const newFollow = {
       followingId: new ObjectId(followingId),

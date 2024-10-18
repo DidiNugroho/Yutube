@@ -25,6 +25,7 @@ const postTypeDefs = `#graphql
   }
 
   type Like {
+    _id: ID!
     username: String!
     createdAt: String!
     updatedAt: String!
