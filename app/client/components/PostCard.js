@@ -4,7 +4,9 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 const PostCard = ({ post, onPress }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Image source={{ uri: post.imgUrl }} style={styles.postImage} />
+      {post.imgUrl && (
+        <Image source={{ uri: post.imgUrl }} style={styles.postImage} resizeMode="contain"/>
+      )}
       <View style={styles.cardContent}>
         <Image
           source={{ uri: `https://picsum.photos/500/500?random=${post._id}` }}
@@ -31,7 +33,7 @@ const styles = StyleSheet.create({
   cardContent: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10, 
+    marginTop: 10,
   },
   profileImage: {
     width: 50,

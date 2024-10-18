@@ -26,13 +26,12 @@ export default function LoginScreen({ navigation }) {
         variables: {
           email,
           password
-        }
+        },
+        fetchPolicy: 'network-only'
       })
       const token = result.data.loginUser.access_token
       const _id = result.data.loginUser.userId
       const username = result.data.loginUser.username
-
-      console.log(result)
 
       await SecureStore.setItemAsync("access_token", token)
       await SecureStore.setItemAsync("_id", _id)

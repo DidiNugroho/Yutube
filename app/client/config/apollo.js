@@ -2,9 +2,8 @@ import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@ap
 import { setContext } from '@apollo/client/link/context';
 import * as SecureStore from 'expo-secure-store';
 
-// Create an HTTP link
 const httpLink = createHttpLink({
-  uri: 'https://bb9e-139-193-179-119.ngrok-free.app', 
+  uri: 'https://690f-139-193-179-119.ngrok-free.app', 
 });
 
 const authLink = setContext(async (_, { headers }) => {
