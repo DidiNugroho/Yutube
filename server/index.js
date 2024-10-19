@@ -10,9 +10,7 @@ const UserModel = require("./models/userModel");
 const server = new ApolloServer({
   typeDefs: [userTypeDefs, postTypeDefs, followTypeDefs],
   resolvers: [userResolvers, postResolvers, followResolvers],
-  introspection: true,
-  csrfPrevention: false,
-  allowBatchedHttpRequests: true
+  introspection: true
 });
 
 const PORT = process.env.PORT || 3000;
@@ -20,10 +18,6 @@ const PORT = process.env.PORT || 3000;
 // Start the standalone server
 startStandaloneServer(server, {
   listen: { port: PORT },
-
-  cors: {
-    origin: "*"
-  },
 
   context: ({ req }) => {
     return {
