@@ -9,6 +9,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator, // Import ActivityIndicator for loading indicator
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
@@ -51,6 +52,7 @@ const SearchScreen = () => {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [userId, setUserId] = useState(null);
+  const [loadingFollow, setLoadingFollow] = useState(false); // State for follow button loading
 
   const [searchUser, { loading, error }] = useLazyQuery(SEARCH_USER, {
     onCompleted: (data) => {
@@ -90,6 +92,7 @@ const SearchScreen = () => {
 
   const handleFollow = async (userId) => {
     try {
+      setLoadingFollow(true); // Start loading when follow button is pressed
       const { data } = await toggleFollow({
         variables: { followingId: userId },
       });
@@ -101,6 +104,8 @@ const SearchScreen = () => {
     } catch (err) {
       console.error(err);
       alert("Failed to follow/unfollow the user.");
+    } finally {
+      setLoadingFollow(false); // Stop loading after follow operation is done
     }
   };
 
@@ -121,15 +126,17 @@ const SearchScreen = () => {
         <Text style={styles.userUsername}>{item.username}</Text>
       </View>
       <TouchableOpacity
-        style={[
-          styles.followButton,
-          isFollowing(item._id) ? styles.followingButton : null,
-        ]}
+        style={[styles.followButton, isFollowing(item._id) ? styles.followingButton : null]}
         onPress={() => handleFollow(item._id)}
+        disabled={loadingFollow} // Disable button while loading
       >
-        <Text style={styles.followButtonText}>
-          {isFollowing(item._id) ? "Unfollow" : "Follow"}
-        </Text>
+        {loadingFollow ? (
+          <ActivityIndicator size="small" color="#fff" /> // Show loading indicator
+        ) : (
+          <Text style={styles.followButtonText}>
+            {isFollowing(item._id) ? "Unfollow" : "Follow"}
+          </Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -149,7 +156,7 @@ const SearchScreen = () => {
       />
       <Button title="Search" onPress={handleSearch} />
 
-      {loading && <Text>Loading...</Text>}
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
       {error && <Text>Error: {error.message}</Text>}
 
       <FlatList
