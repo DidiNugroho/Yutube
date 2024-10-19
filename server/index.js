@@ -10,7 +10,8 @@ const UserModel = require("./models/userModel");
 const server = new ApolloServer({
   typeDefs: [userTypeDefs, postTypeDefs, followTypeDefs],
   resolvers: [userResolvers, postResolvers, followResolvers],
-  introspection: true
+  introspection: true,
+  csrfPrevention: false,
 });
 
 const PORT = process.env.PORT || 3000;
