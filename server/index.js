@@ -20,9 +20,7 @@ startStandaloneServer(server, {
   listen: { port: PORT },
 
   cors: {
-    origin: "*", 
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: "*"
   },
 
   context: ({ req }) => {
