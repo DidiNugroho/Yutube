@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -98,8 +99,15 @@ export default function PostDetailScreen({ navigation, route }) {
     },
   });
 
-  if (loading) return <Text>Loading...</Text>;
-  if (error) return <Text>Error: {error.message}</Text>;
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="tomato" />
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    ); 
+  }
+  if (error) return <Text> Error: {error.message} </Text>;
 
   const post = data.getPost;
 
@@ -232,7 +240,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   commentsScrollView: {
-    maxHeight: 200, // Set a max height for the comments ScrollView
+    maxHeight: 200, 
   },
   commentContentContainer: {
     flex: 1,
@@ -276,5 +284,15 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     justifyContent: "center",
     alignItems: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 18,
+    color: "#000",
   },
 });

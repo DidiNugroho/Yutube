@@ -1,6 +1,14 @@
 import { gql, useMutation } from "@apollo/client";
 import { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
+import Entypo from "@expo/vector-icons/Entypo";
 
 const REGISTER = gql`
   mutation RegisterUser(
@@ -27,41 +35,36 @@ export default function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const [registerUser, { loading, error }] = useMutation(REGISTER, {  
-    onCompleted: () => {  
-      navigation.replace("Login");  
-    },  
-    onError: (error) => {  
-      setErrorMessage(error.message);
-    }
+  const [registerUser, { loading }] = useMutation(REGISTER, {
+    onCompleted: () => {
+      navigation.replace("Login");
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
   });
 
   const handleRegister = async () => {
-    if (!name || !username || !email || !password) {  
-      alert("Please fill in all fields.");  
-      return;  
+    if (!name || !username || !email || !password) {
+      alert("Please fill in all fields.");
+      return;
     }
-
-    try {  
-      await registerUser({  
-        variables: {  
-          name,  
-          username,  
-          email,  
-          password  
-        }  
-      });  
-    } catch (e) {  
-      console.error("Registration error", e);  
-    }  
+    try {
+      await registerUser({
+        variables: { name, username, email, password },
+      });
+    } catch (e) {
+      console.error("Registration error", e);
+    }
   };
 
   return (
     <View style={styles.container}>
       <View style={{ marginBottom: 20, alignItems: "center" }}>
+        <Entypo name="youtube" size={50} color="black" />
         <Text style={styles.title}>Register</Text>
       </View>
+
       <TextInput
         placeholder="Name"
         value={name}
@@ -88,30 +91,49 @@ export default function RegisterScreen({ navigation }) {
         style={styles.input}
       />
 
-      {loading ? (  
-        <ActivityIndicator size="large" color="#0000ff" />  
-      ) : (  
-        <Button title="Register" onPress={handleRegister} />  
-      )}
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <View style={{ flexDirection: "row", marginTop: 10 }}>
+          <Pressable style={styles.button} onPress={handleRegister}>
+            <Text style={styles.buttonText}>Register</Text>
+          </Pressable>
 
-      <View style={{ marginTop: 10 }}>
-        <Button
-          title="Back to Login"
-          onPress={() => navigation.navigate("Login")}
-        />
-      </View>
+          <Pressable
+            style={[styles.button, { marginLeft: 10 }]}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={styles.buttonText}>Back to Login</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
+  container: { flex: 1, justifyContent: "center", padding: 25 },
   input: {
     height: 40,
     borderColor: "gray",
     borderWidth: 1,
     marginBottom: 10,
     padding: 10,
+    borderRadius: 15,
+  },
+  button: {
+    backgroundColor: "black",
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    alignItems: "center",
+    width: "50%",
+    alignSelf: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   title: { fontSize: 24, fontWeight: "bold" },
 });

@@ -130,7 +130,7 @@ export default function ProfileScreen({ navigation }) {
       )}  
 
       <View style={styles.logoutContainer}>  
-        <Button title="Logout" color="tomato" onPress={handleLogout} />  
+        <Button title="Logout" color="red" onPress={handleLogout} />  
       </View>  
     </View>  
   );  
