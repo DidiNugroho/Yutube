@@ -12,6 +12,7 @@ const server = new ApolloServer({
   resolvers: [userResolvers, postResolvers, followResolvers],
   introspection: true,
   csrfPrevention: false,
+  allowBatchedHttpRequests: true
 });
 
 const PORT = process.env.PORT || 3000;
